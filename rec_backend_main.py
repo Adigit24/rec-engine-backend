@@ -85,7 +85,7 @@ def store_movie(data):
     conn.close()
 
 # ----------------------- SYNC -----------------------
-@app.post("/sync")
+@app.api_route("/sync", methods=["GET", "POST"])
 def sync_watchlist():
     imdb_ids = fetch_imdb_watchlist()
     tmdb_ids = []
