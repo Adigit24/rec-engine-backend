@@ -43,7 +43,7 @@ init_db()
 
 # ----------------------- HELPERS -----------------------
 def fetch_imdb_watchlist():
-    url = f"https://www.imdb.com/list/{IMDB_LIST_ID}/watchlist"
+    url = f"https://www.imdb.com/user/{IMDB_LIST_ID}/watchlist"
     html = requests.get(url).text
 
     # Extract IMDb IDs
