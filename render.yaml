@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: rec-engine
+    env: docker
+    plan: free
+    autoDeploy: true
