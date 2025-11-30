@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 # -------------------------------------------------------
-# DATABASE INITIALIZATION
+# DATABASE INITIALIZATION (FIXED: cast_list instead of cast)
 # -------------------------------------------------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -30,7 +30,7 @@ def init_db():
             title TEXT,
             genres TEXT,
             overview TEXT,
-            cast TEXT,
+            cast_list TEXT,
             directors TEXT,
             keywords TEXT,
             popularity REAL,
@@ -46,16 +46,12 @@ init_db()
 # HELPERS
 # -------------------------------------------------------
 def fetch_imdb_watchlist():
-    # FIXED: correct IMDb URL for user watchlist
     url = f"https://www.imdb.com/user/{IMDB_LIST_ID}/watchlist"
-
     headers = {"User-Agent": "Mozilla/5.0"}
-
     html = requests.get(url, headers=headers).text
 
-    # extract all ttXXXX IDs
     import re
-    ids = list(set(re.findall(r"tt\d+", html)))
+    ids = list(set(re.findall(r"tt\\d+", html)))
     return ids
 
 
@@ -82,7 +78,7 @@ def store_movie(data):
     c.execute(
         """
         INSERT OR REPLACE INTO movies
-        (tmdb_id, title, genres, overview, cast, directors, keywords, popularity, poster)
+        (tmdb_id, title, genres, overview, cast_list, directors, keywords, popularity, poster)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
@@ -100,9 +96,8 @@ def store_movie(data):
     conn.commit()
     conn.close()
 
-
 # -------------------------------------------------------
-# SYNC ENDPOINT (NOW GET + POST)
+# SYNC ENDPOINT (GET + POST)
 # -------------------------------------------------------
 @app.api_route("/sync", methods=["GET", "POST"])
 def sync_watchlist():
@@ -142,23 +137,21 @@ def sync_watchlist():
 
     return {"status": "ok", "synced": len(tmdb_ids)}
 
-
 # -------------------------------------------------------
-# RECOMMENDATIONS
+# RECOMMENDATIONS (FIXED: cast_list selected properly)
 # -------------------------------------------------------
 @app.get("/recommendations")
 def recommendations():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        "SELECT tmdb_id, title, genres, overview, cast, directors, keywords, popularity, poster FROM movies"
+        "SELECT tmdb_id, title, genres, overview, cast_list, directors, keywords, popularity, poster FROM movies"
     )
     rows = c.fetchall()
     conn.close()
 
     import random
 
-    # simple rec logic for now
     recs = {
         "Because You Watched…": random.sample(rows, min(10, len(rows))),
         "Dark / Psychological": random.sample(rows, min(10, len(rows))),
@@ -167,8 +160,6 @@ def recommendations():
     }
     return recs
 
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
