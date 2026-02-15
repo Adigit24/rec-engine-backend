@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Movie</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 100px;
+    }
+
+    input {
+      padding: 10px;
+      width: 250px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      cursor: pointer;
+      background: red;
+      color: white;
+      border: none;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Add Movie to Watchlist</h2>
+
+  <div>
+    <input type="text" id="movieName" placeholder="Enter movie name" />
+    <button onclick="addMovie()">Add</button>
+  </div>
+
+  <p id="result"></p>
+
+  <script>
+    async function addMovie() {
+      const movieName = document.getElementById("movieName").value.trim();
+      const resultEl = document.getElementById("result");
+
+      if (!movieName) {
+        resultEl.innerText = "Enter a movie name";
+        return;
+      }
+
+      resultEl.innerText = "Searching...";
+
+      try {
+        const response = await fetch(
+          "https://xctrunzwmgmhdfrawjls.functions.supabase.co/add-movie",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdHJ1bnp3bWdtaGRmcmF3amxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTI3NTMsImV4cCI6MjA4NjU2ODc1M30.mlVrIh3P7U6z-nbU6rouOdwUJaUR5NX30MMute0Heuw",
+              "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdHJ1bnp3bWdtaGRmcmF3amxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTI3NTMsImV4cCI6MjA4NjU2ODc1M30.mlVrIh3P7U6z-nbU6rouOdwUJaUR5NX30MMute0Heuw"
+            },
+            body: JSON.stringify({ query: movieName })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          resultEl.innerText = "Error: " + (data.error || "Something went wrong");
+        } else {
+          resultEl.innerText = "Added: " + data.movie.title;
+        }
+
+      } catch (err) {
+        resultEl.innerText = "Request failed";
+      }
+    }
+  </script>
+
+</body>
+</html>
+
